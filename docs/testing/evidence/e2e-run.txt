@@ -1,0 +1,12 @@
+PASS E2E-01 Normal expense submission and manager approval
+PASS E2E-02 Expense above ₹25,000 requires auditor review
+PASS E2E-03 Expense above ₹1,00,000 requires finance head approval
+PASS E2E-04 Expense exceeding a policy limit (cab ₹2,500 > ₹2,000/trip)
+PASS E2E-05 Missing mandatory receipt (meal ₹800, no receipt)
+PASS E2E-06 Duplicate expense submission (same vendor + amount + date)
+PASS E2E-07 Duplicate receipt file upload
+PASS E2E-08 Weekend expense flagging (cab ₹300 on a Saturday)
+PASS E2E-09 Manager clarification, employee resubmission and approval
+PASS E2E-10 Delegated approval, then payout and CSV export
+
+10/10 passed

@@ -1,0 +1,13 @@
+{
+  "name": "expenseflow-qa-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests for ExpenseFlow. Drives the locally installed Chrome; kept separate from the frontend's dependencies.",
+  "scripts": {
+    "e2e": "node e2e-cases.mjs",
+    "smoke": "node frontend-smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.48.2"
+  }
+}

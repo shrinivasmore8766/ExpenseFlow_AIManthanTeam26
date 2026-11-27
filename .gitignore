@@ -32,3 +32,7 @@ frontend/node_modules/
 frontend/dist/
 .idea/
 *.iml
+
+# QA tooling
+qa/**/node_modules/
+qa/**/.tmp/

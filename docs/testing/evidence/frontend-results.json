@@ -1,0 +1,288 @@
+{
+  "run": "QA-mwz14ser",
+  "executedAt": "2026-11-27T13:42:05.680Z",
+  "ui": "http://localhost:5173",
+  "total": 22,
+  "passed": 22,
+  "failed": 0,
+  "results": [
+    {
+      "id": "FE-01",
+      "name": "Invalid login shows an error and stays on the login page",
+      "status": "Pass",
+      "observed": {
+        "error": "Invalid username or password."
+      }
+    },
+    {
+      "id": "FE-02-employee",
+      "name": "employee: login lands on the dashboard with role-specific navigation",
+      "status": "Pass",
+      "observed": {
+        "navigation": [
+          "Dashboard",
+          "My claims",
+          "New claim",
+          "Policy rules"
+        ],
+        "welcome": "Good evening, Rohan",
+        "kpiCards": 4,
+        "charts": 1
+      }
+    },
+    {
+      "id": "FE-03-employee",
+      "name": "employee: every navigation page loads without console errors or failed API calls",
+      "status": "Pass",
+      "observed": {
+        "pages": {
+          "Dashboard": "Good evening, Rohan",
+          "My claims": "My claims",
+          "New claim": "Start an expense claim",
+          "Policy rules": "Policy rules"
+        },
+        "detailPage": "CLM-003273"
+      }
+    },
+    {
+      "id": "FE-02-manager",
+      "name": "manager: login lands on the dashboard with role-specific navigation",
+      "status": "Pass",
+      "observed": {
+        "navigation": [
+          "Dashboard",
+          "My claims",
+          "New claim",
+          "Approvals",
+          "Policy rules"
+        ],
+        "welcome": "Good evening, Vikram",
+        "kpiCards": 4,
+        "charts": 3
+      }
+    },
+    {
+      "id": "FE-03-manager",
+      "name": "manager: every navigation page loads without console errors or failed API calls",
+      "status": "Pass",
+      "observed": {
+        "pages": {
+          "Dashboard": "Good evening, Vikram",
+          "My claims": "My claims",
+          "New claim": "Start an expense claim",
+          "Approvals": "Approvals",
+          "Policy rules": "Policy rules"
+        },
+        "detailPage": "CLM-002924"
+      }
+    },
+    {
+      "id": "FE-02-auditor",
+      "name": "auditor: login lands on the dashboard with role-specific navigation",
+      "status": "Pass",
+      "observed": {
+        "navigation": [
+          "Dashboard",
+          "My claims",
+          "New claim",
+          "Audit queue",
+          "Policy rules"
+        ],
+        "welcome": "Good evening, Anil",
+        "kpiCards": 4,
+        "charts": 3
+      }
+    },
+    {
+      "id": "FE-03-auditor",
+      "name": "auditor: every navigation page loads without console errors or failed API calls",
+      "status": "Pass",
+      "observed": {
+        "pages": {
+          "Dashboard": "Good evening, Anil",
+          "My claims": "My claims",
+          "New claim": "Start an expense claim",
+          "Audit queue": "Audit queue",
+          "Policy rules": "Policy rules"
+        }
+      }
+    },
+    {
+      "id": "FE-02-financehead",
+      "name": "financehead: login lands on the dashboard with role-specific navigation",
+      "status": "Pass",
+      "observed": {
+        "navigation": [
+          "Dashboard",
+          "My claims",
+          "New claim",
+          "Approvals",
+          "Payouts",
+          "Policy rules"
+        ],
+        "welcome": "Good evening, Priya",
+        "kpiCards": 5,
+        "charts": 3
+      }
+    },
+    {
+      "id": "FE-03-financehead",
+      "name": "financehead: every navigation page loads without console errors or failed API calls",
+      "status": "Pass",
+      "observed": {
+        "pages": {
+          "Dashboard": "Good evening, Priya",
+          "My claims": "My claims",
+          "New claim": "Start an expense claim",
+          "Approvals": "Approvals",
+          "Payouts": "Payouts",
+          "Policy rules": "Policy rules"
+        }
+      }
+    },
+    {
+      "id": "FE-04",
+      "name": "Route guards: roles without access see an access message, not data",
+      "status": "Pass",
+      "observed": {
+        "employee /approvals": "You do not have access to this page",
+        "employee /payouts": "You do not have access to this page",
+        "manager /payouts": "You do not have access to this page"
+      }
+    },
+    {
+      "id": "FE-05",
+      "name": "Broken routes and missing claims are handled",
+      "status": "Pass",
+      "observed": {
+        "unknownRoute": "Page not found",
+        "missingClaim": "Claim not found"
+      }
+    },
+    {
+      "id": "FE-06",
+      "name": "Another employee's claim shows \"Claim not found\" (isolation in the UI)",
+      "status": "Pass",
+      "observed": {
+        "otherEmployeeView": "Claim not found"
+      }
+    },
+    {
+      "id": "FE-07",
+      "name": "Form validation feedback on claim creation and expense lines",
+      "status": "Pass",
+      "observed": {
+        "titleError": "Give your claim a short title.",
+        "lineErrors": [
+          "Enter an amount.",
+          "Who did you pay?"
+        ],
+        "decimalsError": "Use at most 2 decimals.",
+        "hotelErrors": [
+          "City is required for hotel stays.",
+          "At least 1 night."
+        ],
+        "submitDisabledWithoutLines": true
+      }
+    },
+    {
+      "id": "FE-08",
+      "name": "Script in user input is rendered as text, never executed (XSS)",
+      "status": "Pass",
+      "observed": {
+        "injectedImgElements": 0,
+        "xssFlag": null,
+        "renderedAsText": true
+      }
+    },
+    {
+      "id": "FE-09",
+      "name": "Error state with Retry when the API fails, then recovery",
+      "status": "Pass",
+      "observed": {
+        "errorBanner": "Cannot reach the server. Check that the backend is running.\nRetry",
+        "rowsAfterRetry": 15
+      }
+    },
+    {
+      "id": "FE-10",
+      "name": "Empty states: approvals with no matches, search with no results",
+      "status": "Pass",
+      "observed": {
+        "approvalsEmpty": "You are all caught up",
+        "searchEmpty": "No matching claims"
+      }
+    },
+    {
+      "id": "FE-11",
+      "name": "Search, status filter and pagination on My claims",
+      "status": "Pass",
+      "observed": {
+        "paginationInfo": "1–15 of 130",
+        "paginationInfoPage2": "16–30 of 130",
+        "pageChanged": true,
+        "searchRows": 1,
+        "paidFilterBadges": [
+          "Paid"
+        ]
+      }
+    },
+    {
+      "id": "FE-12",
+      "name": "Forged/expired credentials send the user back to the login page",
+      "status": "Pass",
+      "observed": {
+        "url": "http://localhost:5173/login"
+      }
+    },
+    {
+      "id": "FE-13",
+      "name": "Logout clears the session and protects routes",
+      "status": "Pass",
+      "observed": {
+        "storageAfterLogout": null
+      }
+    },
+    {
+      "id": "FE-14",
+      "name": "Receipt viewer shows the uploaded receipt to the approver",
+      "status": "Pass",
+      "observed": {
+        "naturalWidth": 240,
+        "blobUrl": true
+      }
+    },
+    {
+      "id": "FE-15-phone",
+      "name": "Responsive phone 390px: no horizontal overflow; drawer navigation works",
+      "status": "Pass",
+      "observed": {
+        "overflow": {
+          "/dashboard": 0,
+          "/claims": 0,
+          "/claims/new": 0,
+          "/approvals": 0,
+          "/payouts": 0,
+          "/policy-rules": 0
+        },
+        "drawerClosedAfterNav": true
+      }
+    },
+    {
+      "id": "FE-15-tablet",
+      "name": "Responsive tablet 820px: no horizontal overflow; drawer navigation works",
+      "status": "Pass",
+      "observed": {
+        "overflow": {
+          "/dashboard": 0,
+          "/claims": 0,
+          "/claims/new": 0,
+          "/approvals": 0,
+          "/payouts": 0,
+          "/policy-rules": 0
+        },
+        "drawerClosedAfterNav": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+claim 3202 CLM-003202: PENDING_MANAGER, manager-level approver Priya Sharma
+financehead approve -> PENDING_AUDITOR
+auditor approve     -> PENDING_FINANCE_HEAD
+financehead         approve -> HTTP 403 You already approved this claim.
+auditor             approve -> HTTP 403 You already approved this claim.
+ceo                 approve -> HTTP 404 Claim not found.
+final status PENDING_FINANCE_HEAD
+CLAIM_ID=3202

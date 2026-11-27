@@ -1,0 +1,201 @@
+{
+  "run": "QA-mwz131i1",
+  "executedAt": "2026-11-27T13:41:01.946Z",
+  "ui": "http://localhost:5173",
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "results": [
+    {
+      "id": "E2E-01",
+      "scenario": "Normal expense submission and manager approval",
+      "status": "Pass",
+      "observed": {
+        "claimId": 3262,
+        "afterSubmit": "Pending · Manager",
+        "violations": [],
+        "policyMessage": "Policy engine: Routed to manager: amount above auto-approve limit ₹5000.",
+        "afterManager": "Approved",
+        "history": [
+          "Submitted by Rohan Gupta",
+          "Policy check by System (policy engine)",
+          "Approved by Vikram Rao"
+        ],
+        "screenshot": "evidence/screenshots/E2E-01-approved.png"
+      },
+      "ms": 6171
+    },
+    {
+      "id": "E2E-02",
+      "scenario": "Expense above ₹25,000 requires auditor review",
+      "status": "Pass",
+      "observed": {
+        "claimId": 3263,
+        "afterSubmit": "Pending · Manager",
+        "afterManager": "Pending · Auditor",
+        "afterAuditor": "Approved",
+        "screenshot": "evidence/screenshots/E2E-02-auditor-approved.png"
+      },
+      "ms": 9546
+    },
+    {
+      "id": "E2E-03",
+      "scenario": "Expense above ₹1,00,000 requires finance head approval",
+      "status": "Pass",
+      "observed": {
+        "claimId": 3264,
+        "afterManager": "Pending · Auditor",
+        "afterAuditor": "Pending · Finance Head",
+        "afterFinanceHead": "Approved",
+        "approvals": [
+          "Approved by Vikram Rao",
+          "Approved by Anil Kumar",
+          "Approved by Priya Sharma"
+        ],
+        "screenshot": "evidence/screenshots/E2E-03-finance-head-approved.png"
+      },
+      "ms": 12788
+    },
+    {
+      "id": "E2E-04",
+      "scenario": "Expense exceeding a policy limit (cab ₹2,500 > ₹2,000/trip)",
+      "status": "Pass",
+      "observed": {
+        "formPolicyHint": "Meal policy\nDaily meal total per employee — limit ₹1,500.00",
+        "claimId": 3265,
+        "afterSubmit": "Pending · Manager",
+        "violations": [
+          "CAB_TRIP_LIMIT"
+        ],
+        "lineOutcome": "Needs approval",
+        "screenshot": "evidence/screenshots/E2E-04-cab-limit.png"
+      },
+      "ms": 4366
+    },
+    {
+      "id": "E2E-05",
+      "scenario": "Missing mandatory receipt (meal ₹800, no receipt)",
+      "status": "Pass",
+      "observed": {
+        "formHint": "Receipt required above ₹500.00.",
+        "claimId": 3266,
+        "afterSubmit": "Rejected",
+        "violations": [
+          "RECEIPT_REQUIRED"
+        ],
+        "message": "RECEIPT_REQUIRED Receipt required above ₹500",
+        "screenshot": "evidence/screenshots/E2E-05-receipt-required.png"
+      },
+      "ms": 3956
+    },
+    {
+      "id": "E2E-06",
+      "scenario": "Duplicate expense submission (same vendor + amount + date)",
+      "status": "Pass",
+      "observed": {
+        "firstClaim": {
+          "id": 3267,
+          "status": "Approved",
+          "violations": []
+        },
+        "secondClaim": {
+          "id": 3268,
+          "status": "Pending · Manager",
+          "violations": [
+            "DUPLICATE_EXPENSE"
+          ]
+        },
+        "screenshot": "evidence/screenshots/E2E-06-duplicate-expense.png"
+      },
+      "ms": 4641
+    },
+    {
+      "id": "E2E-07",
+      "scenario": "Duplicate receipt file upload",
+      "status": "Pass",
+      "observed": {
+        "firstClaim": {
+          "id": 3269,
+          "status": "Pending · Auditor",
+          "violations": []
+        },
+        "secondClaim": {
+          "id": 3270,
+          "status": "Rejected",
+          "violations": [
+            "DUPLICATE_RECEIPT"
+          ]
+        },
+        "screenshot": "evidence/screenshots/E2E-07-duplicate-receipt.png"
+      },
+      "ms": 5279
+    },
+    {
+      "id": "E2E-08",
+      "scenario": "Weekend expense flagging (cab ₹300 on a Saturday)",
+      "status": "Pass",
+      "observed": {
+        "claimId": 3271,
+        "expenseDate": "2024-10-26",
+        "afterSubmit": "Pending · Manager",
+        "violations": [
+          "WEEKEND_EXPENSE"
+        ],
+        "flaggedInQueue": true,
+        "screenshot": "evidence/screenshots/E2E-08-weekend.png"
+      },
+      "ms": 5364
+    },
+    {
+      "id": "E2E-09",
+      "scenario": "Manager clarification, employee resubmission and approval",
+      "status": "Pass",
+      "observed": {
+        "claimId": 3272,
+        "emptyCommentError": "A comment is required to send back.",
+        "afterSendBack": "Clarification requested",
+        "employeeBanner": "Vikram Rao asked for clarification: Please split breakfast out of the room rate",
+        "afterResubmit": "Pending · Manager",
+        "afterApproval": "Approved",
+        "history": [
+          "Submitted by Rohan Gupta",
+          "Policy check by System (policy engine)",
+          "Sent back for clarification by Vikram Rao",
+          "Submitted by Rohan Gupta",
+          "Policy check by System (policy engine)",
+          "Approved by Vikram Rao"
+        ],
+        "screenshot": "evidence/screenshots/E2E-09-resubmitted-approved.png"
+      },
+      "ms": 10435
+    },
+    {
+      "id": "E2E-10",
+      "scenario": "Delegated approval, then payout and CSV export",
+      "status": "Pass",
+      "observed": {
+        "delegation": "MS\nMaria Sharma\n 27 Nov 2026 → 29 Nov 2026\nActive",
+        "claimId": 3273,
+        "afterDelegate": "Approved",
+        "delegateHistory": "Approved by Maria Sharma on behalf of Vikram Rao",
+        "batch": "PB-00023",
+        "csvFile": "payout_PB-00023.csv",
+        "csvHeader": "H,EXPENSEFLOW,PB-00023,2026-11-27,6,157950.00",
+        "csvTrailer": "T,6,157950.00",
+        "csvRows": 8,
+        "csvHasClaims": {
+          "CLM-003262": true,
+          "CLM-003263": true,
+          "CLM-003264": true,
+          "CLM-003272": true,
+          "CLM-003273": true
+        },
+        "batchStatus": "Paid",
+        "finalStatus": "Paid",
+        "screenshot": "evidence/screenshots/E2E-10-payout-paid.png",
+        "delegationRemoved": true
+      },
+      "ms": 14541
+    }
+  ]
+}
