@@ -40,14 +40,17 @@ export function setUnauthorizedHandler(fn) {
 
 async function toError(res) {
   let message = `Request failed (${res.status})`;
+  let fieldErrors = null;
   try {
     const problem = await res.json();
     message = problem.detail || problem.title || message;
+    fieldErrors = problem.errors || null; // Bean Validation: { field: message }
   } catch {
     // body was not JSON
   }
   const err = new Error(message);
   err.status = res.status;
+  err.fieldErrors = fieldErrors;
   return err;
 }
 

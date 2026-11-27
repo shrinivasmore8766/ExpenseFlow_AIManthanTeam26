@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { apiDelete, apiGet, apiPost } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
@@ -7,29 +7,46 @@ import Money, { formatDate, formatDateTime } from '../components/Money.jsx';
 import ViolationList, { OutcomeBadge } from '../components/ViolationList.jsx';
 import ReceiptViewer from '../components/ReceiptViewer.jsx';
 import HistoryTimeline from '../components/HistoryTimeline.jsx';
-import { ErrorBanner, Loading } from '../components/PageState.jsx';
+import Modal from '../components/Modal.jsx';
+import Icon from '../components/Icon.jsx';
+import { useToast } from '../components/ToastContext.jsx';
+import { useConfirm } from '../components/ConfirmContext.jsx';
+import { EmptyState, ErrorBanner, Loading } from '../components/PageState.jsx';
+import { initials } from '../components/Layout.jsx';
 
-const CATEGORY_LABEL = { MEAL: 'Meal', HOTEL: 'Hotel', LOCAL_CAB: 'Local cab', TRAVEL: 'Travel', OTHER: 'Other' };
+const CATEGORY = {
+  MEAL: ['Meal', '🍽️'], HOTEL: ['Hotel', '🏨'], LOCAL_CAB: ['Local cab', '🚕'], TRAVEL: ['Travel', '✈️'], OTHER: ['Other', '📦'],
+};
 
 const DECISIONS = {
-  APPROVE: { label: 'Approve', path: 'approve', className: 'btn-primary', commentRequired: false },
-  SEND_BACK: { label: 'Send back', path: 'send-back', className: '', commentRequired: true },
-  REJECT: { label: 'Reject', path: 'reject', className: 'btn-danger', commentRequired: true },
+  APPROVE: {
+    label: 'Approve', path: 'approve', className: 'btn-success', icon: 'check', commentRequired: false,
+    title: 'Approve claim', help: 'Add an optional note for the record.', done: 'Claim approved',
+  },
+  SEND_BACK: {
+    label: 'Send back', path: 'send-back', className: '', icon: 'rotate', commentRequired: true,
+    title: 'Send back for clarification', help: 'Tell the employee what to fix. They can edit and resubmit.', done: 'Claim sent back',
+  },
+  REJECT: {
+    label: 'Reject', path: 'reject', className: 'btn-danger', icon: 'x', commentRequired: true,
+    title: 'Reject claim', help: 'Explain why the claim is rejected. This is final.', done: 'Claim rejected',
+  },
 };
 
 export default function ClaimDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const [claim, setClaim] = useState(null);
   const [loadError, setLoadError] = useState(null);
-  const [error, setError] = useState(null);
-  const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState(false);
   const [selectedLineId, setSelectedLineId] = useState(null);
+  const [decision, setDecision] = useState(null); // APPROVE | SEND_BACK | REJECT
   const [comment, setComment] = useState('');
+  const [commentError, setCommentError] = useState(null);
 
   const load = useCallback(() => {
     setLoadError(null);
@@ -44,163 +61,179 @@ export default function ClaimDetailPage() {
 
   useEffect(load, [load]);
 
-  useEffect(() => {
-    if (location.state?.justSubmitted) setNotice('Claim submitted. The policy engine result is shown below.');
-  }, [location.state]);
+  function openDecision(action) {
+    setDecision(action);
+    setComment('');
+    setCommentError(null);
+  }
 
-  async function decide(action) {
-    const d = DECISIONS[action];
+  async function decide() {
+    const d = DECISIONS[decision];
     const text = comment.trim();
     if (d.commentRequired && !text) {
-      setError(`A comment is required to ${d.label.toLowerCase()}.`);
-      document.getElementById('decision-comment')?.focus();
+      setCommentError(`A comment is required to ${d.label.toLowerCase()}.`);
       return;
     }
     setBusy(true);
-    setError(null);
-    setNotice(null);
     try {
       const updated = await apiPost(`/claims/${id}/${d.path}`, text ? { comment: text } : {});
       setClaim(updated);
-      setComment('');
-      setNotice(`${d.label} recorded. Status is now shown above.`);
+      setDecision(null);
+      toast.success(`Status is now shown on the claim.`, d.done);
     } catch (e) {
-      setError(e.message);
+      setCommentError(e.message);
     } finally {
       setBusy(false);
     }
   }
 
   async function submit() {
-    if (!window.confirm('Submit this claim for approval?')) return;
+    const ok = await confirm({
+      title: claim.status === 'CLARIFICATION_REQUESTED' ? 'Resubmit claim?' : 'Submit for approval?',
+      message: 'The policy engine will check every line and route the claim.',
+      confirmLabel: 'Submit claim',
+    });
+    if (!ok) return;
     setBusy(true);
-    setError(null);
     try {
       setClaim(await apiPost(`/claims/${id}/submit`));
-      setNotice('Claim submitted. The policy engine result is shown below.');
+      toast.success('The policy engine result is shown below.', 'Claim submitted');
     } catch (e) {
-      setError(e.message);
+      toast.error(e.message);
     } finally {
       setBusy(false);
     }
   }
 
   async function deleteDraft() {
-    if (!window.confirm('Delete this draft claim permanently?')) return;
+    const ok = await confirm({
+      title: 'Delete draft?', message: 'This draft and its receipts will be permanently deleted.',
+      confirmLabel: 'Delete draft', tone: 'danger',
+    });
+    if (!ok) return;
     setBusy(true);
     try {
       await apiDelete(`/claims/${id}`);
+      toast.success('Draft deleted.');
       navigate('/claims', { replace: true });
     } catch (e) {
-      setError(e.message);
+      toast.error(e.message);
       setBusy(false);
     }
   }
 
-  if (loadError) {
+  if (loadError === 'Claim not found.') {
     return (
-      <>
-        <ErrorBanner error={loadError} onRetry={loadError === 'Claim not found.' ? null : load} />
-        <Link to="/claims" className="btn">Back to my claims</Link>
-      </>
+      <div className="card">
+        <EmptyState icon="search" title="Claim not found"
+          action={<Link to="/claims" className="btn"><Icon name="chevronLeft" size={16} /> Back to my claims</Link>}>
+          It may have been deleted, or you do not have access to it.
+        </EmptyState>
+      </div>
     );
   }
-  if (!claim) return <Loading />;
+  if (loadError) return <ErrorBanner error={loadError} onRetry={load} />;
+  if (!claim) return <Loading variant="detail" />;
 
   const actions = claim.allowedActions || [];
   const decisionActions = ['APPROVE', 'SEND_BACK', 'REJECT'].filter((a) => actions.includes(a));
   const isClaimant = user.id === claim.employeeId;
   const selectedLine = claim.lines.find((l) => l.id === selectedLineId) || null;
   const policyEntry = [...(claim.history || [])].reverse().find((h) => h.action === 'POLICY_DECISION');
+  const d = decision && DECISIONS[decision];
 
   return (
     <>
       <div className="page-head">
         <div>
-          <h1>{claim.claimNumber} · {claim.title}</h1>
-          <div className="actions">
+          <div className="page-eyebrow">{claim.claimNumber}</div>
+          <div className="title-row">
+            <h1>{claim.title}</h1>
             <StatusBadge status={claim.status} />
-            {claim.hasViolations && <span className="badge b-amber">⚠ Policy flags</span>}
-            {claim.autoApproved && <span className="badge b-green">Auto-approved</span>}
-            {!isClaimant && claim.sampleAudit && <span className="badge b-violet">Sample audit</span>}
+            {claim.hasViolations && <span className="badge badge-warning"><Icon name="alert" size={12} /> Policy flags</span>}
+            {claim.autoApproved && <span className="badge badge-success"><Icon name="sparkle" size={12} /> Auto-approved</span>}
+            {!isClaimant && claim.sampleAudit && <span className="badge badge-violet">Sample audit</span>}
           </div>
         </div>
         <div className="actions">
-          {actions.includes('EDIT') && <Link to={`/claims/${claim.id}/edit`} className="btn">Edit</Link>}
+          {actions.includes('EDIT') && <Link to={`/claims/${claim.id}/edit`} className="btn"><Icon name="edit" size={16} /> Edit</Link>}
           {actions.includes('DELETE') && (
-            <button type="button" className="btn-danger" onClick={deleteDraft} disabled={busy}>Delete draft</button>
+            <button type="button" className="btn-danger" onClick={deleteDraft} disabled={busy}><Icon name="trash" size={16} /> Delete</button>
           )}
           {actions.includes('SUBMIT') && (
             <button type="button" className="btn-primary" onClick={submit} disabled={busy || claim.lines.length === 0}>
-              {claim.status === 'CLARIFICATION_REQUESTED' ? 'Resubmit' : 'Submit'}
+              <Icon name="send" size={16} /> {claim.status === 'CLARIFICATION_REQUESTED' ? 'Resubmit' : 'Submit'}
             </button>
           )}
         </div>
       </div>
 
-      <ErrorBanner error={error} />
-      {notice && <div className="banner banner-success" role="status">{notice}</div>}
+      {decisionActions.length > 0 && (
+        <div className="decision-bar">
+          <div className="decision-text">
+            <span className="kpi-icon tone-accent"><Icon name="inbox" size={18} /></span>
+            <div><strong>Your decision is needed</strong><span>Review the lines and receipts, then decide.</span></div>
+          </div>
+          <div className="actions">
+            {decisionActions.map((a) => (
+              <button key={a} type="button" className={DECISIONS[a].className} disabled={busy} onClick={() => openDecision(a)}>
+                <Icon name={DECISIONS[a].icon} size={16} /> {DECISIONS[a].label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {policyEntry?.comment && (
-        <div className="banner banner-info small"><span className="banner-body"><strong>Policy engine:</strong> {policyEntry.comment}</span></div>
+        <div className={`alert ${claim.hasViolations ? 'alert-warning' : 'alert-info'}`}>
+          <Icon name="sparkle" size={18} />
+          <span className="alert-body"><strong>Policy engine:</strong> {policyEntry.comment}</span>
+        </div>
       )}
 
       <section className="card">
         <dl className="kv">
-          <div><dt>Employee</dt><dd>{claim.employeeName}</dd></div>
+          <div>
+            <dt>Employee</dt>
+            <dd className="cell-person"><span className="avatar">{initials(claim.employeeName)}</span>{claim.employeeName}</dd>
+          </div>
           <div><dt>Department</dt><dd>{claim.departmentName || '—'}</dd></div>
           <div><dt>Submitted</dt><dd>{claim.submittedAt ? formatDateTime(claim.submittedAt) : 'Not submitted'}</dd></div>
           <div><dt>Current approver</dt><dd>{claim.currentApproverName || '—'}</dd></div>
-          <div><dt>Total claimed</dt><dd><Money value={claim.totalAmount} /></dd></div>
-          <div><dt>Approvable amount</dt><dd><Money value={claim.approvedAmount} /></dd></div>
+          <div><dt>Total claimed</dt><dd className="amount-lg"><Money value={claim.totalAmount} /></dd></div>
+          <div><dt>Approvable</dt><dd className="amount-lg text-success"><Money value={claim.approvedAmount} /></dd></div>
         </dl>
       </section>
 
-      {decisionActions.length > 0 && (
-        <section className="card">
-          <h2>Your decision</h2>
-          <div className="field">
-            <label htmlFor="decision-comment">Comment (required to reject or send back)</label>
-            <textarea id="decision-comment" maxLength={1000} value={comment}
-              onChange={(e) => setComment(e.target.value)} />
-          </div>
-          <div className="actions">
-            {decisionActions.map((a) => (
-              <button key={a} type="button" className={DECISIONS[a].className} disabled={busy} onClick={() => decide(a)}>
-                {DECISIONS[a].label}
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div className="grid-2">
-        <section className="card">
-          <h2>Expense lines</h2>
-          {claim.lines.length === 0 ? <p className="muted">No lines.</p> : (
+      <div className="grid-2 section-gap">
+        <section className="card card-flush">
+          <div className="card-head"><div><h2>Expense lines</h2><p>Select a line to view its receipt.</p></div></div>
+          {claim.lines.length === 0 ? <EmptyState icon="receipt" title="No expense lines" /> : (
             <div className="table-wrap" style={{ maxHeight: 'none' }}>
               <table>
                 <thead>
-                  <tr>
-                    <th>Line</th>
-                    <th className="num">Amount</th>
-                    <th>Outcome</th>
-                  </tr>
+                  <tr><th>Expense</th><th className="num">Amount</th><th>Outcome</th></tr>
                 </thead>
                 <tbody>
                   {claim.lines.map((l) => (
                     <tr key={l.id} className={`clickable ${l.id === selectedLineId ? 'selected' : ''}`}
                       onClick={() => setSelectedLineId(l.id)}>
                       <td>
-                        <strong>{CATEGORY_LABEL[l.category] || l.category}</strong> · {l.vendor}
-                        <div className="small muted">
-                          {formatDate(l.expenseDate)}
-                          {l.category === 'HOTEL' && <> · {l.city}, {l.nights} night(s)</>}
-                          {' · '}{l.hasReceipt ? '📎 receipt' : 'no receipt'}
+                        <div className="line-cat">
+                          <span className="cat-icon" aria-hidden="true">{CATEGORY[l.category]?.[1]}</span>
+                          <div style={{ minWidth: 0 }}>
+                            <div className="cell-title">{l.vendor}</div>
+                            <div className="cell-sub">
+                              {CATEGORY[l.category]?.[0] || l.category} · {formatDate(l.expenseDate)}
+                              {l.category === 'HOTEL' && <> · {l.city}, {l.nights} night(s)</>}
+                              {' · '}{l.hasReceipt ? <span className="text-success">receipt ✓</span> : <span className="text-warning">no receipt</span>}
+                            </div>
+                          </div>
                         </div>
-                        {l.description && <div className="small">{l.description}</div>}
+                        {l.description && <div className="small muted" style={{ marginTop: 6 }}>{l.description}</div>}
                         <ViolationList violations={l.violations} />
                       </td>
-                      <td className="num"><Money value={l.amount} /></td>
+                      <td className="num strong"><Money value={l.amount} /></td>
                       <td><OutcomeBadge outcome={l.outcome} /></td>
                     </tr>
                   ))}
@@ -211,15 +244,47 @@ export default function ClaimDetailPage() {
         </section>
 
         <section className="card sticky-col">
-          <h2>Receipt{selectedLine ? ` · ${selectedLine.vendor}` : ''}</h2>
+          <div className="card-head" style={{ marginBottom: 12 }}>
+            <div><h2>Receipt</h2><p>{selectedLine ? selectedLine.vendor : 'No line selected'}</p></div>
+          </div>
           <ReceiptViewer claimId={claim.id} line={selectedLine} />
         </section>
       </div>
 
       <section className="card">
-        <h2>History</h2>
+        <div className="card-head"><div><h2>Activity</h2><p>Every action on this claim, oldest first.</p></div></div>
         <HistoryTimeline history={claim.history} />
       </section>
+
+      <Modal
+        open={Boolean(d)}
+        title={d?.title}
+        onClose={() => setDecision(null)}
+        busy={busy}
+        footer={d && (
+          <>
+            <button type="button" onClick={() => setDecision(null)} disabled={busy}>Cancel</button>
+            <button type="button" className={d.className === 'btn-danger' ? 'btn-danger-solid' : (d.className || 'btn-primary')}
+              onClick={decide} disabled={busy}>
+              {busy ? <span className="spinner" /> : <Icon name={d.icon} size={16} />} {d.label}
+            </button>
+          </>
+        )}
+      >
+        {d && (
+          <>
+            <p className="muted">{claim.claimNumber} · {claim.employeeName} · <Money value={claim.approvedAmount} /></p>
+            <div className={`field ${commentError ? 'has-error' : ''}`}>
+              <label htmlFor="decision-comment">
+                Comment {d.commentRequired ? <span className="text-danger">*</span> : <span className="muted">(optional)</span>}
+              </label>
+              <textarea id="decision-comment" maxLength={1000} value={comment} placeholder={d.help}
+                onChange={(e) => { setComment(e.target.value); setCommentError(null); }} />
+              {commentError && <div className="field-error"><Icon name="alert" size={13} /> {commentError}</div>}
+            </div>
+          </>
+        )}
+      </Modal>
     </>
   );
 }
