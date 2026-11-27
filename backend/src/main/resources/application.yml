@@ -11,9 +11,19 @@ spring:
     username: ${DB_USER:expenseflow}
     # Local-dev default only; Docker Compose and real deployments pass DB_PASSWORD from .env
     password: ${DB_PASSWORD:expenseflow}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 10000   # fail fast (10 s) when PostgreSQL is not reachable
+  sql:
+    init:
+      # schema.sql adds CHECK constraints and the append-only trigger on audit_log after Hibernate
+      # has created/updated the tables. Idempotent; runs on every start.
+      mode: always
+      separator: "^;"
   jpa:
     hibernate:
       ddl-auto: update        # deliberate 3-hour trade-off (see docs/architecture/04); Flyway is the next step
+    defer-datasource-initialization: true   # run schema.sql after Hibernate DDL
     open-in-view: false       # map entities to DTOs inside @Transactional services
     properties:
       hibernate:
@@ -48,3 +58,12 @@ management:
     health:
       probes:
         enabled: true
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId:-}]"   # request id from RequestLoggingFilter
+  level:
+    root: INFO
+    com.expenseflow: INFO
+    org.hibernate.SQL: WARN           # set to DEBUG locally to see SQL
+    org.hibernate.orm.deprecation: ERROR
