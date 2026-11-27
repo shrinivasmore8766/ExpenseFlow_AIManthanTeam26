@@ -1,0 +1,22 @@
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.032 s -- in com.expenseflow.approval.ApprovalRulesTest$Lifecycle
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in com.expenseflow.approval.ApprovalRulesTest$Delegation
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.151 s -- in com.expenseflow.approval.ApprovalRulesTest$Permissions
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in com.expenseflow.approval.ApprovalRulesTest$Thresholds
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.422 s -- in com.expenseflow.approval.ApprovalRulesTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.464 s -- in com.expenseflow.claim.ReceiptValidationTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.063 s -- in com.expenseflow.payout.BankCsvWriterTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in com.expenseflow.policy.PolicyEngineTest$SampleAudit
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in com.expenseflow.policy.PolicyEngineTest$ClaimDecisionRouting
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in com.expenseflow.policy.PolicyEngineTest$WeekendExpense
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in com.expenseflow.policy.PolicyEngineTest$DuplicateReceipt
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in com.expenseflow.policy.PolicyEngineTest$DuplicateExpense
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.expenseflow.policy.PolicyEngineTest$ReceiptRequired
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.expenseflow.policy.PolicyEngineTest$CabTripLimit
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in com.expenseflow.policy.PolicyEngineTest$HotelLimits
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in com.expenseflow.policy.PolicyEngineTest$MealDailyLimit
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.253 s -- in com.expenseflow.policy.PolicyEngineTest
+[INFO] Tests run: 93, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Building jar: /app/target/expenseflow-backend.jar
+[INFO] Replacing main artifact /app/target/expenseflow-backend.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /app/target/expenseflow-backend.jar.original
+[INFO] BUILD SUCCESS

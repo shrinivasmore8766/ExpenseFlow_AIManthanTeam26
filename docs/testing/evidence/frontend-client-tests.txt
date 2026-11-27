@@ -1,0 +1,27 @@
+▶ query()
+  ✔ builds a query string and skips empty values (5.6249ms)
+  ✔ encodes special characters (0.488ms)
+✔ query() (9.4681ms)
+▶ basicAuthHeader()
+  ✔ encodes ASCII and non-ASCII credentials as UTF-8 base64 (1.0404ms)
+✔ basicAuthHeader() (1.4862ms)
+▶ request handling
+  ✔ prefixes /api, sends Authorization and Accept, parses JSON (44.5499ms)
+  ✔ JSON bodies get a Content-Type; GET has no body (2.2913ms)
+  ✔ apiUpload sends FormData and lets the browser set the multipart Content-Type (1.807ms)
+  ✔ 204 No Content resolves to null (0.3672ms)
+  ✔ errors carry ProblemDetail.detail, status and field errors (2.1114ms)
+  ✔ falls back to title, then to a generic message for non-JSON errors (3.8161ms)
+  ✔ 401 clears credentials and calls the unauthorized handler (4.1315ms)
+  ✔ 403 keeps credentials (wrong role is not a logout) (1.7389ms)
+  ✔ network failure produces a friendly message with status 0 (1.2116ms)
+  ✔ apiDownload returns the blob and the server file name (8.5159ms)
+✔ request handling (71.8892ms)
+ℹ tests 13
+ℹ suites 3
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 611.9941

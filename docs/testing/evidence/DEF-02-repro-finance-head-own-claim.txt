@@ -1,0 +1,13 @@
+claim 3185 CLM-003185: PENDING_MANAGER, approver Rajesh Iyer
+ceo approve        -> PENDING_AUDITOR
+auditor approve    -> PENDING_FINANCE_HEAD
+financehead        approve -> HTTP 403 You cannot act on your own claim.
+ceo                approve -> HTTP 403 You already approved this claim.
+auditor            approve -> HTTP 403 You already approved this claim.
+auditor2           approve -> HTTP 403 You are not an approver for this claim.
+manager            approve -> HTTP 404 Claim not found.
+financehead        queue contains claim: false
+ceo                queue contains claim: false
+auditor            queue contains claim: false
+final status PENDING_FINANCE_HEAD; allowedActions for FH: []
+CLAIM_ID=3185

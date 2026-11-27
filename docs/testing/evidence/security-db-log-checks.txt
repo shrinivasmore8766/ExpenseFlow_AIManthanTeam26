@@ -1,0 +1,81 @@
+# Security / integrity checks run 2026-11-27T13:45:11Z
+--- 1. password storage (BCrypt)
+ users | bcrypt_hashes | min_len 
+-------+---------------+---------
+   150 |           150 |      60
+(1 row)
+
+--- 2. audit_log is append-only (each attempt inside a transaction that is rolled back)
+BEGIN
+ERROR:  audit_log is append-only: UPDATE is not allowed
+CONTEXT:  PL/pgSQL function audit_log_block_change() line 1 at RAISE
+ROLLBACK
+BEGIN
+ERROR:  audit_log is append-only: DELETE is not allowed
+CONTEXT:  PL/pgSQL function audit_log_block_change() line 1 at RAISE
+ROLLBACK
+--- 3. payout integrity
+ rejected_with_payout 
+----------------------
+                    0
+(1 row)
+
+ paid_without_batch 
+--------------------
+                  0
+(1 row)
+
+--- 4. sample audit selection rate over seeded (non-QA) auto-approved claims
+ auto_approved | sampled | pct  
+---------------+---------+------
+          1025 |      89 | 8.68
+(1 row)
+
+--- 5. audit actions recorded today
+       action       | count 
+--------------------+-------
+ CLAIM_CREATE       |   275
+ LINE_CREATE        |   218
+ CLAIM_SUBMIT       |   180
+ RECEIPT_UPLOAD     |   168
+ CLAIM_APPROVE      |   108
+ CLAIM_DELETE       |    94
+ CLAIM_REJECT       |    73
+ PAYOUT_EXPORT      |    11
+ PAYOUT_CREATE      |    11
+ PAYOUT_MARK_PAID   |    11
+ DELEGATION_CREATE  |    10
+ DELEGATION_DELETE  |    10
+ LINE_UPDATE        |    10
+ CLAIM_BULK_APPROVE |     8
+ POLICY_RULE_UPDATE |     8
+ CLAIM_SEND_BACK    |     6
+ CLAIM_RESUBMIT     |     6
+ CLAIM_UPDATE       |     4
+ LINE_DELETE        |     4
+ DATA_SEED          |     1
+(20 rows)
+
+--- 6. backend log lines: 4392
+--- 7. log lines containing credentials (Demo@123 / Authorization / Basic token / bcrypt hash): 0
+--- 8. HTTP status codes served (request log):
+   2836 200
+     10 201
+    104 204
+    124 400
+     89 401
+    119 403
+     86 404
+     43 409
+      4 413
+--- 9. ERROR log lines and their source:
+      7 org.hibernate.orm.jdbc.batch             : HHH100501
+--- 10. tracked files that look like secrets:
+(none)
+--- 11. password-like literals in tracked source/config:
+.env.example:3:DB_PASSWORD=change-me
+.env.example:5:APP_DEMO_PASSWORD=Demo@123
+backend/src/main/java/com/expenseflow/seed/DataSeeder.java:140:        this.demoPassword = demoPassword;
+backend/src/main/resources/application.yml:13:    password: ${DB_PASSWORD:expenseflow}
+backend/src/main/resources/application.yml:48:    demo-password: ${APP_DEMO_PASSWORD:Demo@123}
+frontend/src/pages/LoginPage.jsx:13:const DEMO_PASSWORD = 'Demo@123';

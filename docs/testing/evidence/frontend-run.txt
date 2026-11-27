@@ -1,0 +1,24 @@
+PASS FE-01 Invalid login shows an error and stays on the login page
+PASS FE-02-employee employee: login lands on the dashboard with role-specific navigation
+PASS FE-03-employee employee: every navigation page loads without console errors or failed API calls
+PASS FE-02-manager manager: login lands on the dashboard with role-specific navigation
+PASS FE-03-manager manager: every navigation page loads without console errors or failed API calls
+PASS FE-02-auditor auditor: login lands on the dashboard with role-specific navigation
+PASS FE-03-auditor auditor: every navigation page loads without console errors or failed API calls
+PASS FE-02-financehead financehead: login lands on the dashboard with role-specific navigation
+PASS FE-03-financehead financehead: every navigation page loads without console errors or failed API calls
+PASS FE-04 Route guards: roles without access see an access message, not data
+PASS FE-05 Broken routes and missing claims are handled
+PASS FE-06 Another employee's claim shows "Claim not found" (isolation in the UI)
+PASS FE-07 Form validation feedback on claim creation and expense lines
+PASS FE-08 Script in user input is rendered as text, never executed (XSS)
+PASS FE-09 Error state with Retry when the API fails, then recovery
+PASS FE-10 Empty states: approvals with no matches, search with no results
+PASS FE-11 Search, status filter and pagination on My claims
+PASS FE-12 Forged/expired credentials send the user back to the login page
+PASS FE-13 Logout clears the session and protects routes
+PASS FE-14 Receipt viewer shows the uploaded receipt to the approver
+PASS FE-15-phone Responsive phone 390px: no horizontal overflow; drawer navigation works
+PASS FE-15-tablet Responsive tablet 820px: no horizontal overflow; drawer navigation works
+
+22/22 passed

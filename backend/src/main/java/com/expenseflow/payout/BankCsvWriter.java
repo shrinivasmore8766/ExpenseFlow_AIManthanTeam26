@@ -15,7 +15,7 @@ import com.expenseflow.user.Employee;
  * D,&lt;claimNumber&gt;,&lt;employeeName&gt;,&lt;bankAccount&gt;,&lt;ifsc&gt;,&lt;amount&gt;,INR,&lt;claimTitle&gt;
  * T,&lt;count&gt;,&lt;total&gt;
  * </pre>
- * Cells starting with = + - @ get a ' prefix (CSV-injection guard); cells with commas or quotes are quoted.
+ * Cells starting with = + - @ tab or CR get a ' prefix (CSV-injection guard); cells with commas or quotes are quoted.
  */
 public final class BankCsvWriter {
 
@@ -49,7 +49,8 @@ public final class BankCsvWriter {
 
     static String cell(String value) {
         String v = value == null ? "" : value;
-        if (!v.isEmpty() && "=+-@".indexOf(v.charAt(0)) >= 0) {
+        // OWASP CSV-injection guidance: a leading tab or carriage return can also start a formula.
+        if (!v.isEmpty() && "=+-@\t\r".indexOf(v.charAt(0)) >= 0) {
             v = "'" + v;
         }
         if (v.contains(",") || v.contains("\"") || v.contains("\n") || v.contains("\r")) {
