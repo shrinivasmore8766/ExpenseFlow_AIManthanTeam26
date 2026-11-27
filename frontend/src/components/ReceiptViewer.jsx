@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiDownload } from '../api/client.js';
+import Icon from './Icon.jsx';
 
 /** Loads the receipt with the auth header and shows it from a blob URL (plain <img src> can't authenticate). */
 export default function ReceiptViewer({ claimId, line }) {
@@ -31,10 +32,14 @@ export default function ReceiptViewer({ claimId, line }) {
     };
   }, [claimId, lineId, hasReceipt]);
 
-  if (!line) return <div className="receipt-frame muted">Select a line to view its receipt.</div>;
-  if (!hasReceipt) return <div className="receipt-frame muted">No receipt uploaded for this line.</div>;
-  if (state.loading) return <div className="receipt-frame muted">Loading receipt…</div>;
-  if (state.error) return <div className="banner banner-error">{state.error}</div>;
+  if (!line) {
+    return <div className="receipt-frame receipt-empty"><Icon name="file" size={28} /><span>Select a line to view its receipt</span></div>;
+  }
+  if (!hasReceipt) {
+    return <div className="receipt-frame receipt-empty"><Icon name="paperclip" size={28} /><span>No receipt uploaded for this line</span></div>;
+  }
+  if (state.loading) return <div className="receipt-frame"><div className="skeleton receipt-skeleton" /></div>;
+  if (state.error) return <div className="alert alert-error"><Icon name="xCircle" size={18} /><span className="alert-body">{state.error}</span></div>;
   if (!state.url) return null;
 
   const isPdf = state.type.includes('pdf');
@@ -45,9 +50,9 @@ export default function ReceiptViewer({ claimId, line }) {
           ? <iframe src={state.url} title={`Receipt for line ${line.id}`} />
           : <img src={state.url} alt={`Receipt for ${line.vendor}`} />}
       </div>
-      <p className="small">
-        <a href={state.url} target="_blank" rel="noreferrer">Open in new tab</a>
-      </p>
+      <a className="receipt-open" href={state.url} target="_blank" rel="noreferrer">
+        <Icon name="eye" size={14} /> Open full size
+      </a>
     </div>
   );
 }
