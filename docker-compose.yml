@@ -1,0 +1,40 @@
+# One-command seeded demo:  docker compose up --build
+# Local backend dev:        docker compose up -d db   (then run the backend from your IDE / mvnw)
+# The frontend service is added in the frontend setup step.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: expenseflow
+      POSTGRES_USER: ${DB_USER:-expenseflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-expenseflow}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-expenseflow} -d expenseflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/expenseflow
+      DB_USER: ${DB_USER:-expenseflow}
+      DB_PASSWORD: ${DB_PASSWORD:-expenseflow}
+      APP_SEED_ENABLED: ${APP_SEED_ENABLED:-true}
+      APP_DEMO_PASSWORD: ${APP_DEMO_PASSWORD:-Demo@123}
+      APP_RECEIPTS_DIR: /data/receipts
+    ports:
+      - "8080:8080"
+    volumes:
+      - receipts:/data/receipts
+
+volumes:
+  db-data:
+  receipts:

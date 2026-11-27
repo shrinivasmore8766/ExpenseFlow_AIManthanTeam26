@@ -1,0 +1,10 @@
+# Keep LF in the repo so scripts and Dockerfiles work inside Linux containers.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary

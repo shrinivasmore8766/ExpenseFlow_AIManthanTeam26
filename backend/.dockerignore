@@ -1,0 +1,6 @@
+target/
+data/
+.mvn/wrapper/*.jar
+*.iml
+.idea/
+CLAUDE.md

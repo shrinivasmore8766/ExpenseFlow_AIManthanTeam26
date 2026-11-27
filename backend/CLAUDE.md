@@ -42,8 +42,9 @@ duplicated in both files and must stay identical**.
 ## 3. Folder structure
 ```
 src/main/java/com/expenseflow/
-  config/     SecurityConfig, WebConfig, GlobalExceptionHandler
-  common/     CurrentUser (resolves logged-in Employee), NotFoundException, ForbiddenException, BadRequestException
+  config/     SecurityConfig, WebConfig, GlobalExceptionHandler, TimeConfig (Clock bean)
+  common/     CurrentUser (resolves logged-in Employee), NotFoundException (404), ForbiddenException (403),
+              BadRequestException (400), ConflictException (409 illegal state)
   user/       Employee, Department, Delegation, Role + repositories, UserController, DelegationController, DelegationService
   policy/     PolicyEngine (pure), PolicyContext, LineInput, LineResult, Outcome, PolicyRule, AppConfig, PolicyService, PolicyRuleController
   claim/      Claim, ClaimLine, ClaimStatus, Category, PolicyViolation, ClaimService, ClaimController, ReceiptStorage, dto/
